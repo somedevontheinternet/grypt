@@ -43,8 +43,7 @@ func (r *EncryptRunner) processFile(file FileMeta) {
 		r.Meta = append(r.Meta, file)
 		return
 	}
-	if r.Meta[lastMetaI].ModTime == file.ModTime { // no change
-		fmt.Println("NO CHANGE: ", file.DecryptedName)
+	if r.Meta[lastMetaI].ModTime.UTC() == file.ModTime.UTC() { // no change
 		return
 	}
 
