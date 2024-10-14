@@ -43,12 +43,13 @@ func (r *EncryptRunner) processFile(file FileMeta) {
 		r.Meta = append(r.Meta, file)
 		return
 	}
+
 	if r.Meta[lastMetaI].ModTime.UTC() == file.ModTime.UTC() { // no change
 		return
 	}
 
 	fmt.Println("MODIFIED: ", file.DecryptedName)
-	r.Meta[lastMetaI].ModTime = file.ModTime
+	r.Meta[lastMetaI].ModTime = file.ModTime.UTC()
 	Encrypt(r.Key, filepath.Join(r.DecryptedDir, file.DecryptedName), filepath.Join(r.EncryptedDir, r.Meta[lastMetaI].EncryptedName))
 }
 
@@ -61,7 +62,6 @@ func (r *EncryptRunner) Run(files []FileMeta) {
 	}
 
 	// Check every old file for deletion
-
 	for i := 0; i < len(r.Meta); i++ {
 		_, err := os.Stat(filepath.Join(r.DecryptedDir, r.Meta[i].DecryptedName))
 		if errors.Is(err, os.ErrNotExist) {
@@ -80,7 +80,7 @@ func (r *EncryptRunner) Run(files []FileMeta) {
 }
 
 func PerformEncryption() {
-	key := GetEncryptionKey(true)
+	key := GetPassphrase(true)
 	meta := GetMeta(key)
 	files := ListFiles(*SrcRoot)
 	r := NewEncryptRunner(key, *SrcRoot, *BlobsRoot, meta)

@@ -23,13 +23,13 @@ func NewDecryptRunner(key, encryptDir, decryptedDir string, jobs chan FileMeta, 
 		dir := filepath.Dir(outPath)
 		os.MkdirAll(dir, 0755)
 		Decrypt(key, inPath, outPath)
-		os.Chtimes(outPath, job.ModTime, job.ModTime)
+		os.Chtimes(outPath, job.ModTime.UTC(), job.ModTime.UTC())
 		wg.Done()
 	}
 }
 
 func PerformDecryption() {
-	key := GetEncryptionKey(false)
+	key := GetPassphrase(false)
 	meta := GetMeta(key)
 	prepareDir(*OutRoot)
 	runners := runtime.NumCPU()

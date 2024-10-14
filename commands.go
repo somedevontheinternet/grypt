@@ -8,8 +8,10 @@ import (
 	"os/exec"
 )
 
+const gpg = "gpg"
+
 func Encrypt(key, in, out string) {
-	cmd := exec.Command("gpg", "--batch", "--yes", "--passphrase", key, "--output", out, "--symmetric", "--cipher-algo", "AES256", in)
+	cmd := exec.Command(gpg, "--batch", "--yes", "--passphrase", key, "--output", out, "--symmetric", "--cipher-algo", "AES256", in)
 	b := new(bytes.Buffer)
 	cmd.Stderr = b
 	err := cmd.Run()
@@ -22,7 +24,7 @@ func Encrypt(key, in, out string) {
 }
 
 func Decrypt(key, in, out string) {
-	cmd := exec.Command("gpg", "--batch", "--yes", "--passphrase", key, "--output", out, "--decrypt", in)
+	cmd := exec.Command(gpg, "--batch", "--yes", "--passphrase", key, "--output", out, "--decrypt", in)
 	b := new(bytes.Buffer)
 	cmd.Stderr = b
 	err := cmd.Run()

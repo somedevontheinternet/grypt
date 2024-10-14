@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"golang.org/x/term"
@@ -26,8 +27,8 @@ func prepareDir(dir string) {
 	}
 }
 
-func GetEncryptionKey(confirm bool) string {
-	fmt.Print("Enter encryption key: ")
+func getPassphraseFromStdin(confirm bool) string {
+	fmt.Print("Enter passphrase: ")
 	key0, err := term.ReadPassword(0)
 	if err != nil {
 		panic(err)
@@ -35,17 +36,35 @@ func GetEncryptionKey(confirm bool) string {
 	fmt.Println()
 
 	if confirm {
-		fmt.Print("Confirm encryption key: ")
+		fmt.Print("Confirm passphrase: ")
 		key1, err := term.ReadPassword(0)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println()
 		if string(key0) != string(key1) {
-			panic(fmt.Errorf("encryption keys do not match"))
+			panic(fmt.Errorf("passphrases do not match"))
 		}
 	}
 	return string(key0)
+}
+
+func GetPassphrase(confirm bool) string {
+	// passphrase from cli arguments
+	if passphrase != nil && *passphrase != "" {
+		return *passphrase
+	}
+
+	// passphrase from file
+	if passfile != nil && *passfile != "" {
+		src, err := os.ReadFile(*passfile)
+		if err != nil {
+			panic(err)
+		}
+		return string(src)
+	}
+
+	return getPassphraseFromStdin(confirm)
 }
 
 func ListFiles(dir string) []FileMeta {
@@ -64,7 +83,7 @@ func ListFiles(dir string) []FileMeta {
 		}
 		meta := FileMeta{
 			DecryptedName: abs[len(dirAbs)+len(string(os.PathSeparator)):],
-			ModTime:       info.ModTime(),
+			ModTime:       info.ModTime().UTC(),
 		}
 		files = append(files, meta)
 		return nil
@@ -73,4 +92,11 @@ func ListFiles(dir string) []FileMeta {
 		panic(err)
 	}
 	return files
+}
+
+func CheckGPG() {
+	_, err := exec.LookPath(gpg)
+	if err != nil {
+		panic(err)
+	}
 }
