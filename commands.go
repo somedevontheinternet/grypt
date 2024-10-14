@@ -18,7 +18,7 @@ func Encrypt(key, in, out string) {
 	if err != nil {
 		fmt.Printf("Error encrypting %s\n", in)
 		fmt.Println(cmd.String())
-		io.Copy(os.Stderr, b)
+		_, _ = io.Copy(os.Stderr, b)
 		panic(err)
 	}
 }
@@ -31,7 +31,7 @@ func Decrypt(key, in, out string) {
 	if err != nil {
 		fmt.Printf("Error decrypting %s\n", in)
 		fmt.Println(cmd.String())
-		io.Copy(os.Stderr, b)
+		_, _ = io.Copy(os.Stderr, b)
 		panic(err)
 	}
 }

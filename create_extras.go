@@ -20,7 +20,10 @@ func GenerateExtra(file, content string) {
 	}
 
 	defer f.Close()
-	io.Copy(f, strings.NewReader(content))
+	_, err = io.Copy(f, strings.NewReader(content))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func GenerateExtras() {

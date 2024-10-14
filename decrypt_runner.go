@@ -17,14 +17,24 @@ type DecryptRunner struct {
 
 func NewDecryptRunner(key, encryptDir, decryptedDir string, jobs chan FileMeta, wg *sync.WaitGroup) {
 	for job := range jobs {
-		fmt.Printf("DECRYPTING: %s\n", job.DecryptedName)
-		inPath := filepath.Join(encryptDir, job.EncryptedName)
-		outPath := filepath.Join(decryptedDir, job.DecryptedName)
-		dir := filepath.Dir(outPath)
-		os.MkdirAll(dir, 0755)
-		Decrypt(key, inPath, outPath)
-		os.Chtimes(outPath, job.ModTime.UTC(), job.ModTime.UTC())
-		wg.Done()
+		(func(job FileMeta) {
+			defer wg.Done()
+			fmt.Printf("DECRYPTING: %s\n", job.DecryptedName)
+			inPath := filepath.Join(encryptDir, job.EncryptedName)
+			outPath := filepath.Join(decryptedDir, job.DecryptedName)
+			dir := filepath.Dir(outPath)
+			err := os.MkdirAll(dir, 0755)
+			if err != nil {
+				fmt.Printf("Skipping %s: %s\n", job.DecryptedName, err)
+				return
+			}
+			Decrypt(key, inPath, outPath)
+			err = os.Chtimes(outPath, job.ModTime.UTC(), job.ModTime.UTC())
+			if err != nil {
+				fmt.Printf("Could not set back the modtime for %s\n", job.DecryptedName)
+
+			}
+		})(job)
 	}
 }
 
