@@ -15,7 +15,7 @@ var OutRoot = flag.String("out", "out", "output directory")
 var passphrase = flag.String("passphrase", "", "passphrase to use for encryption")
 var passfile = flag.String("passfile", "", "passfile to use for encryption")
 
-const usage = "Usage: grypt encrypt|decrypt"
+const usage = "Usage: grypt [flags] encrypt|decrypt"
 
 func main() {
 	CheckGPG()
